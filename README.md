@@ -8,7 +8,7 @@ apollo-link-field-keep
 
 **EXPERIMENTAL**
 
-Similar to `@omit` and `@keep`, but allows bypassing certain parts of the query completely
+Similar to `@include` and `@skip`, but allows bypassing certain parts of the query completely
 before sending it to the server
 
 [API Documentation](https://freshcells.github.io/apollo-link-field-keep/api/)

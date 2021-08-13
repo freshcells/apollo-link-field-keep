@@ -19,7 +19,7 @@
     "directive",
     "freshcells"
   ],
-  "description": "Similar to `@omit` and `@keep`, but allows bypassing certain parts of the query completely before sending it to the server",
+  "description": "Similar to `@include` and `@skip`, but allows bypassing certain parts of the query completely before sending it to the server",
   "scripts": {
     "test-watch": "jest --watch",
     "fix": "run-s 'fix:*'",
