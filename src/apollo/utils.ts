@@ -161,7 +161,7 @@ export const findOriginalPaths = (
 }
 
 /**
- * Mutates an object an initializes it with the given path
+ * Mutates an object and initializes it with the given path
  * @param {Object} object the object
  * @param {Array<string>} path the path to set
  * @param value
