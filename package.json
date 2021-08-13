@@ -4,7 +4,7 @@
   "main": "build/main/index.js",
   "module": "build/module/index.js",
   "files": [
-    "build/module"
+    "build/module",
     "build/main"
   ],
   "peerDependencies": {
