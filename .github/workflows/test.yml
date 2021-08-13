@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         node: [ '14', '16' ]
-    name: Testing on ${{ matrix.node }}
+    name: Testing on node ${{ matrix.node }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
