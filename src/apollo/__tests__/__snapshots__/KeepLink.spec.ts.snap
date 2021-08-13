@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[` 1`] = `
+"query someQuery {
+  someOther {
+    subFieldOther
+  }
+  field {
+    subFieldA
+    subFieldB
+  }
+}
+"
+`;
+
+exports[`IgnoreLink Aliases should properly map aliases 1`] = `
+"query someQuery {
+  aliasForDeeply: deeply {
+    nested {
+      ...someOtherFragment
+    }
+  }
+}
+
+fragment someOtherFragment on Type 
+"
+`;
+
+exports[`IgnoreLink Field Arguments should keep variables if they are used elsewhere 1`] = `
+"query someQuery($argValue: String!) {
+  someOther {
+    subFieldOther(someArg: $argValue) {
+      subSubFieldOther
+    }
+  }
+}
+"
+`;
+
+exports[`IgnoreLink Field Arguments should remove argument variables if exists 1`] = `
+"query someQuery {
+  someOther {
+    subFieldOther
+  }
+}
+"
+`;
+
+exports[`IgnoreLink Fragment should work with fragments 1`] = `
+"query someQuery {
+  deeply {
+    nested {
+      ...queryFragment
+    }
+  }
+}
+
+fragment queryFragment on Type 
+"
+`;
+
+exports[`IgnoreLink should remove directives and fields if shouldKeep is false 1`] = `
+"query someQuery {
+  test {
+    some
+  }
+}
+"
+`;
+
+exports[`IgnoreLink should should keep fields, but remove directives if shouldKeep is true 1`] = `
+"query someQuery {
+  test {
+    some
+  }
+  field {
+    subFieldA
+    subFieldB
+  }
+}
+"
+`;
