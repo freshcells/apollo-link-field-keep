@@ -57,7 +57,7 @@ query someQuery($argValue: String! $shouldKeep: Boolean!) {
 }
 ```
 
-If `shouldKeep` in this example is true, it will remove the whole `field` query including arguments.
+If `$shouldKeep` in this example is `false`, it will remove the whole `field` query including arguments.
 It will also clean up all variables that might be used (if not used by other fields).
 
 To prevent Apollo Cache issues it will fill the field with `null` when returned from the server.

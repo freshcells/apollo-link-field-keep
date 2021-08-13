@@ -3,7 +3,7 @@ import { print } from 'graphql/language/printer'
 import { removeIgnoreSetsFromDocument } from '../KeepLink'
 import { setInObject } from '../utils'
 
-describe('IgnoreLink', () => {
+describe('KeepLink', () => {
   const query = gql`
     query someQuery($shouldKeep: Boolean!) {
       test {
