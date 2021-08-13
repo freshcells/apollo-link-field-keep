@@ -29,5 +29,9 @@
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules"],
-  "compileOnSave": false
+  "compileOnSave": false,
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "out": "build/docs"
+  }
 }
