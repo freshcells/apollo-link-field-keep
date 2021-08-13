@@ -15,6 +15,7 @@ Allows bypassing certain parts of the query before it's send to the server.
 
 ### Setup
 
+```ts
     import KeepLink from '@freshcells/apollo-link-field-keep'
 
     // ...
@@ -27,6 +28,7 @@ Allows bypassing certain parts of the query before it's send to the server.
         // .. other links
       ]),
     })
+```
 
 You can then use the `@keep` directive as:
 

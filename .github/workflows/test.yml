@@ -39,6 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: yarn doc
       - name: Deploy 🚀 Documentation
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
