@@ -8,7 +8,7 @@
   ],
   "peerDependencies": {
     "@apollo/client": ">=3",
-    "apollo-utilities": "^1",
+    "apollo-utilities": ">=1",
     "graphql": ">=15"
   },
   "scripts": {

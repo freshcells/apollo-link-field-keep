@@ -21,8 +21,22 @@ jobs:
         if: always()
         with:
           files: test-results/**/*.xml
-on:
-  push:
-    branches:
-      - main
+  publish:
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: 'yarn'
+      - run: yarn install
+      - run: yarn build
+      - run: yarn semantic-release
+
+on: [push, pull_request]
+
 

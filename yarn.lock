@@ -1374,7 +1374,7 @@ __metadata:
     typescript: ^4.3.5
   peerDependencies:
     "@apollo/client": ">=3"
-    apollo-utilities: ^1
+    apollo-utilities: ">=1"
     graphql: ">=15"
   languageName: unknown
   linkType: soft
