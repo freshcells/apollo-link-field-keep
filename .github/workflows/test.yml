@@ -17,12 +17,13 @@ jobs:
       - run: yarn install
       - run: yarn test
       - run: yarn cov:send
+        if: matrix.node == '14'
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
-        if: always()
+        if: matrix.node == '14'
         with:
           files: test-results/**/*.xml
   publish:
