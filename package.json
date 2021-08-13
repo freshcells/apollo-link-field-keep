@@ -93,5 +93,11 @@
       ]
     }
   },
+  "release": {
+    "branches": [
+      "main",
+      "next"
+    ]
+  },
   "packageManager": "yarn@3.0.0"
 }
