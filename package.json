@@ -32,6 +32,7 @@
     "lint": "tsc",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
+    "cov:send": "codecov",
     "clean": "rimraf build",
     "doc": "run-s 'doc:html'",
     "doc:html": "typedoc src/ --exclude \"**/+(__tests__|examples)/*\" --out build/docs/api",

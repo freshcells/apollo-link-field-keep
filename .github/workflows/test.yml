@@ -16,6 +16,9 @@ jobs:
           cache: 'yarn'
       - run: yarn install
       - run: yarn test
+      - run: yarn cov:send
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         if: always()
