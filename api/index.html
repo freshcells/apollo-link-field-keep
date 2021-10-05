@@ -92,6 +92,9 @@
 
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">keepLink</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">KeepLink</span><span style="color: #000000">()</span>
 
+<span style="color: #000000">    </span><span style="color: #008000">// if you want to use ifFeature conditions, add also the following line, otherwise skip it:</span>
+<span style="color: #000000">    </span><span style="color: #001080">keepLink</span><span style="color: #000000">.</span><span style="color: #001080">enabledFeatures</span><span style="color: #000000"> = [ </span><span style="color: #A31515">&#039;feature1&#039;</span><span style="color: #000000"> ]</span>
+
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">apolloClient</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">ApolloClient</span><span style="color: #000000">({</span>
 <span style="color: #000000">      </span><span style="color: #001080">link:</span><span style="color: #000000"> </span><span style="color: #795E26">from</span><span style="color: #000000">([</span>
 <span style="color: #000000">        </span><span style="color: #001080">keepLink</span><span style="color: #000000">,</span>
@@ -114,6 +117,36 @@
 </code></pre>
 				<p>If <code>$shouldKeep</code> in this example is <code>false</code>, it will remove the whole <code>field</code> query including arguments.
 				It will also clean up all variables that might be used (if not used by other fields).</p>
+				<p>If you have a query that is used in multiple components and needs to include a certain field everywhere,
+				you can use <code>ifFeature</code> instead of <code>if</code> as:</p>
+				<pre><code class="language-graphql"><span style="color: #0000FF">query</span><span style="color: #000000"> </span><span style="color: #795E26">someQuery</span><span style="color: #000000">(</span><span style="color: #001080">$argValue</span><span style="color: #000000">: </span><span style="color: #267F99">String</span><span style="color: #000000">!) {</span>
+<span style="color: #000000">      </span><span style="color: #001080">someOther</span><span style="color: #000000"> {</span>
+<span style="color: #000000">        </span><span style="color: #001080">subFieldOther</span><span style="color: #000000">(</span><span style="color: #001080">someArg</span><span style="color: #000000">: </span><span style="color: #001080">$argValue</span><span style="color: #000000">) {</span>
+<span style="color: #000000">          </span><span style="color: #001080">subSubFieldOther</span>
+<span style="color: #000000">        }</span>
+<span style="color: #000000">      }</span>
+<span style="color: #000000">      </span><span style="color: #001080">field</span><span style="color: #000000">(</span><span style="color: #001080">someArg</span><span style="color: #000000">: </span><span style="color: #001080">$argValue</span><span style="color: #000000">) </span><span style="color: #795E26">@keep</span><span style="color: #000000">(</span><span style="color: #001080">ifFeature</span><span style="color: #000000">: </span><span style="color: #A31515">&quot;feature1&quot;</span><span style="color: #000000">) {</span>
+<span style="color: #000000">        </span><span style="color: #001080">subFieldA</span>
+<span style="color: #000000">        </span><span style="color: #001080">subFieldB</span>
+<span style="color: #000000">      }</span>
+<span style="color: #000000">}</span>
+</code></pre>
+				<p>It will work exactly the same way as <code>$shouldKeep</code> in the previous example. With this approach you just save time
+				as you do not need to pass the same variables to all query use cases.</p>
+				<p>It is also possible to combine <code>if</code> and <code>ifFeature</code>:</p>
+				<pre><code class="language-graphql"><span style="color: #0000FF">query</span><span style="color: #000000"> </span><span style="color: #795E26">someQuery</span><span style="color: #000000">(</span><span style="color: #001080">$argValue</span><span style="color: #000000">: </span><span style="color: #267F99">String</span><span style="color: #000000">! </span><span style="color: #001080">$shouldKeep</span><span style="color: #000000">: </span><span style="color: #267F99">Boolean</span><span style="color: #000000">!) {</span>
+<span style="color: #000000">      </span><span style="color: #001080">someOther</span><span style="color: #000000"> {</span>
+<span style="color: #000000">        </span><span style="color: #001080">subFieldOther</span><span style="color: #000000">(</span><span style="color: #001080">someArg</span><span style="color: #000000">: </span><span style="color: #001080">$argValue</span><span style="color: #000000">) {</span>
+<span style="color: #000000">          </span><span style="color: #001080">subSubFieldOther</span>
+<span style="color: #000000">        }</span>
+<span style="color: #000000">      }</span>
+<span style="color: #000000">      </span><span style="color: #001080">field</span><span style="color: #000000">(</span><span style="color: #001080">someArg</span><span style="color: #000000">: </span><span style="color: #001080">$argValue</span><span style="color: #000000">) </span><span style="color: #795E26">@keep</span><span style="color: #000000">(</span><span style="color: #001080">if</span><span style="color: #000000">: </span><span style="color: #001080">$shouldKeep</span><span style="color: #000000"> </span><span style="color: #001080">ifFeature</span><span style="color: #000000">: </span><span style="color: #A31515">&quot;feature1&quot;</span><span style="color: #000000">) {</span>
+<span style="color: #000000">        </span><span style="color: #001080">subFieldA</span>
+<span style="color: #000000">        </span><span style="color: #001080">subFieldB</span>
+<span style="color: #000000">      }</span>
+<span style="color: #000000">}</span>
+</code></pre>
+				<p>In this case the fields will only be included if both <code>$shouldKeep</code> is true and <code>feature1</code> is enabled.</p>
 				<p>To prevent Apollo Cache issues it will fill the field with <code>null</code> when returned from the server.</p>
 			</div>
 		</div>
