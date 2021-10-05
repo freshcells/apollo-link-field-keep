@@ -16,12 +16,14 @@ import {
 export const DIRECTIVE = 'keep'
 
 interface DirectiveArguments extends Record<string, any> {
-  if?: boolean
+  if?: boolean,
+  ifFeature?: string
 }
 
 export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
   document: T,
-  variables: Record<string, any>
+  variables: Record<string, any>,
+  enabledFeatures: Array<string>
 ): { modifiedDoc: T; nullFields: Array<Array<string | number>> } {
   const { modifiedDoc, pathsToRemove } = removeDirectivesFromDocument(
     [
@@ -37,6 +39,12 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
               directive,
               variables
             )
+            if (args.ifFeature !== undefined && args.if !== undefined) {
+              return !(args.if === true && enabledFeatures.indexOf(args.ifFeature) !== -1)
+            }
+            if (args.ifFeature) {
+              return enabledFeatures.indexOf(args.ifFeature) === -1
+            }
             return args.if === false
           }
           return false
@@ -53,6 +61,12 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
 }
 
 export class KeepLink extends ApolloLink {
+  _enabledFeatures: Array<string> = []
+
+  setEnabledFeatures(features: Array<string>): void {
+    this._enabledFeatures = features
+  }
+
   request(operation: Operation, forward: NextLink): Observable<any> {
     const directives = `directive @${DIRECTIVE} on FIELD`
 
@@ -61,7 +75,8 @@ export class KeepLink extends ApolloLink {
     }))
     const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
       operation.query,
-      operation.variables
+      operation.variables,
+      this._enabledFeatures
     )
     operation.query = modifiedDoc
     // only apply the changes if we actually removed fields.
