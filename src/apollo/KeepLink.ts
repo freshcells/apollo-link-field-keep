@@ -16,7 +16,7 @@ import {
 export const DIRECTIVE = 'keep'
 
 interface DirectiveArguments extends Record<string, any> {
-  if?: boolean,
+  if?: boolean
   ifFeature?: string
 }
 
@@ -40,7 +40,10 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
               variables
             )
             if (args.ifFeature !== undefined && args.if !== undefined) {
-              return !(args.if === true && enabledFeatures.indexOf(args.ifFeature) !== -1)
+              return !(
+                args.if === true &&
+                enabledFeatures.indexOf(args.ifFeature) !== -1
+              )
             }
             if (args.ifFeature) {
               return enabledFeatures.indexOf(args.ifFeature) === -1

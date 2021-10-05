@@ -16,15 +16,23 @@ describe('KeepLink with if', () => {
     }
   `
   it('should remove directives and fields if shouldKeep is false', () => {
-    const { modifiedDoc } = removeIgnoreSetsFromDocument(query, {
-      shouldKeep: false,
-    }, [])
+    const { modifiedDoc } = removeIgnoreSetsFromDocument(
+      query,
+      {
+        shouldKeep: false,
+      },
+      []
+    )
     expect(print(modifiedDoc)).toMatchSnapshot()
   })
   it('should should keep fields, but remove directives if shouldKeep is true', () => {
-    const { modifiedDoc } = removeIgnoreSetsFromDocument(query, {
-      shouldKeep: true,
-    }, [])
+    const { modifiedDoc } = removeIgnoreSetsFromDocument(
+      query,
+      {
+        shouldKeep: true,
+      },
+      []
+    )
     expect(print(modifiedDoc)).toMatchSnapshot()
   })
 
@@ -55,17 +63,21 @@ describe('KeepLink with if', () => {
     `
 
     it('should remove argument variables if exists', () => {
-      const { modifiedDoc } = removeIgnoreSetsFromDocument(queryWithArgument, {
-        shouldKeep: false,
-        argValue: 'test',
-      }, [])
+      const { modifiedDoc } = removeIgnoreSetsFromDocument(
+        queryWithArgument,
+        {
+          shouldKeep: false,
+          argValue: 'test',
+        },
+        []
+      )
       expect(print(modifiedDoc)).toMatchSnapshot()
     })
     it('should keep variables if they are used elsewhere', () => {
       const { modifiedDoc } = removeIgnoreSetsFromDocument(
-          queryWithArgumentAndUsedElsewhere,
-          { shouldKeep: false, argValue: 'test' },
-          []
+        queryWithArgumentAndUsedElsewhere,
+        { shouldKeep: false, argValue: 'test' },
+        []
       )
       expect(print(modifiedDoc)).toMatchSnapshot()
     })
@@ -90,9 +102,9 @@ describe('KeepLink with if', () => {
       }
     `
     const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-        deeperQuery,
-        { shouldKeep: false, argValue: 'test' },
-        []
+      deeperQuery,
+      { shouldKeep: false, argValue: 'test' },
+      []
     )
     expect(nullFields).toEqual([['field', 'subFieldB', 'deep']])
     expect(print(modifiedDoc)).toMatchSnapshot()
@@ -100,7 +112,7 @@ describe('KeepLink with if', () => {
 
   describe('Fragment', () => {
     const someFragment = gql`
-      fragment queryFragment on Type {
+      fragment ifQueryFragment on Type {
         arg @keep(if: $shouldKeep) {
           test
         }
@@ -110,7 +122,7 @@ describe('KeepLink with if', () => {
       query someQuery($shouldKeep: Boolean!) {
         deeply {
           nested {
-            ...queryFragment
+            ...ifQueryFragment
           }
         }
       }
@@ -119,9 +131,9 @@ describe('KeepLink with if', () => {
 
     it('should work with fragments', () => {
       const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-          fragmentQuery,
-          { shouldKeep: false },
-          []
+        fragmentQuery,
+        { shouldKeep: false },
+        []
       )
       expect(nullFields).toEqual([['deeply', 'nested', 'arg']])
       expect(print(modifiedDoc)).toMatchSnapshot()
@@ -130,7 +142,7 @@ describe('KeepLink with if', () => {
 
   describe('Aliases', () => {
     const someFragment = gql`
-      fragment someOtherFragment on Type {
+      fragment someOtherIfFragment on Type {
         aliasForSome: some @keep(if: $shouldKeep) {
           test
         }
@@ -140,7 +152,7 @@ describe('KeepLink with if', () => {
       query someQuery($shouldKeep: Boolean!) {
         aliasForDeeply: deeply {
           nested {
-            ...someOtherFragment
+            ...someOtherIfFragment
           }
         }
       }
@@ -149,9 +161,9 @@ describe('KeepLink with if', () => {
 
     it('should properly map aliases', () => {
       const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-          fragmentQuery,
-          { shouldKeep: false },
-          []
+        fragmentQuery,
+        { shouldKeep: false },
+        []
       )
       expect(nullFields).toEqual([['aliasForDeeply', 'nested', 'aliasForSome']])
       expect(print(modifiedDoc)).toMatchSnapshot()
@@ -168,9 +180,9 @@ describe('KeepLink with if', () => {
       }
     `
     const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-        queryThatWillBeEmpty,
-        { shouldKeep: false },
-        []
+      queryThatWillBeEmpty,
+      { shouldKeep: false },
+      []
     )
 
     expect(nullFields).toEqual([['field']])
@@ -179,7 +191,7 @@ describe('KeepLink with if', () => {
 })
 
 describe('KeepLink with ifFeature', () => {
-  const features = [ 'feature1' ]
+  const features = ['feature1']
   const query = gql`
     query someQuery {
       test {
@@ -227,16 +239,20 @@ describe('KeepLink with ifFeature', () => {
     `
 
     it('should remove argument variables if exists', () => {
-      const { modifiedDoc } = removeIgnoreSetsFromDocument(queryWithArgument, {
-        argValue: 'test',
-      }, [])
+      const { modifiedDoc } = removeIgnoreSetsFromDocument(
+        queryWithArgument,
+        {
+          argValue: 'test',
+        },
+        []
+      )
       expect(print(modifiedDoc)).toMatchSnapshot()
     })
     it('should keep variables if they are used elsewhere', () => {
       const { modifiedDoc } = removeIgnoreSetsFromDocument(
-          queryWithArgumentAndUsedElsewhere,
-          { argValue: 'test' },
-          []
+        queryWithArgumentAndUsedElsewhere,
+        { argValue: 'test' },
+        []
       )
       expect(print(modifiedDoc)).toMatchSnapshot()
     })
@@ -261,9 +277,9 @@ describe('KeepLink with ifFeature', () => {
       }
     `
     const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-        deeperQuery,
-        { argValue: 'test' },
-        []
+      deeperQuery,
+      { argValue: 'test' },
+      []
     )
     expect(nullFields).toEqual([['field', 'subFieldB', 'deep']])
     expect(print(modifiedDoc)).toMatchSnapshot()
@@ -271,7 +287,7 @@ describe('KeepLink with ifFeature', () => {
 
   describe('Fragment', () => {
     const someFragment = gql`
-      fragment queryFragment on Type {
+      fragment ifFeatureQueryFragment on Type {
         arg @keep(ifFeature: "feature1") {
           test
         }
@@ -281,7 +297,7 @@ describe('KeepLink with ifFeature', () => {
       query someQuery {
         deeply {
           nested {
-            ...queryFragment
+            ...ifFeatureQueryFragment
           }
         }
       }
@@ -290,9 +306,9 @@ describe('KeepLink with ifFeature', () => {
 
     it('should work with fragments', () => {
       const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-          fragmentQuery,
-          {},
-          []
+        fragmentQuery,
+        {},
+        []
       )
       expect(nullFields).toEqual([['deeply', 'nested', 'arg']])
       expect(print(modifiedDoc)).toMatchSnapshot()
@@ -301,7 +317,7 @@ describe('KeepLink with ifFeature', () => {
 
   describe('Aliases', () => {
     const someFragment = gql`
-      fragment someOtherFragment on Type {
+      fragment someOtherIfFeatureFragment on Type {
         aliasForSome: some @keep(ifFeature: "feature1") {
           test
         }
@@ -311,7 +327,7 @@ describe('KeepLink with ifFeature', () => {
       query someQuery {
         aliasForDeeply: deeply {
           nested {
-            ...someOtherFragment
+            ...someOtherIfFeatureFragment
           }
         }
       }
@@ -320,9 +336,9 @@ describe('KeepLink with ifFeature', () => {
 
     it('should properly map aliases', () => {
       const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-          fragmentQuery,
-          {},
-          []
+        fragmentQuery,
+        {},
+        []
       )
       expect(nullFields).toEqual([['aliasForDeeply', 'nested', 'aliasForSome']])
       expect(print(modifiedDoc)).toMatchSnapshot()
@@ -339,9 +355,9 @@ describe('KeepLink with ifFeature', () => {
       }
     `
     const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-        queryThatWillBeEmpty,
-        {},
-        []
+      queryThatWillBeEmpty,
+      {},
+      []
     )
 
     expect(nullFields).toEqual([['field']])

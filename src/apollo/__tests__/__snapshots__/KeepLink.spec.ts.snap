@@ -13,20 +13,33 @@ exports[` 1`] = `
 "
 `;
 
-exports[`KeepLink Aliases should properly map aliases 1`] = `
+exports[` 2`] = `
+"query someQuery {
+  someOther {
+    subFieldOther
+  }
+  field {
+    subFieldA
+    subFieldB
+  }
+}
+"
+`;
+
+exports[`KeepLink with if Aliases should properly map aliases 1`] = `
 "query someQuery {
   aliasForDeeply: deeply {
     nested {
-      ...someOtherFragment
+      ...someOtherIfFragment
     }
   }
 }
 
-fragment someOtherFragment on Type 
+fragment someOtherIfFragment on Type 
 "
 `;
 
-exports[`KeepLink Field Arguments should keep variables if they are used elsewhere 1`] = `
+exports[`KeepLink with if Field Arguments should keep variables if they are used elsewhere 1`] = `
 "query someQuery($argValue: String!) {
   someOther {
     subFieldOther(someArg: $argValue) {
@@ -37,7 +50,7 @@ exports[`KeepLink Field Arguments should keep variables if they are used elsewhe
 "
 `;
 
-exports[`KeepLink Field Arguments should remove argument variables if exists 1`] = `
+exports[`KeepLink with if Field Arguments should remove argument variables if exists 1`] = `
 "query someQuery {
   someOther {
     subFieldOther
@@ -46,20 +59,20 @@ exports[`KeepLink Field Arguments should remove argument variables if exists 1`]
 "
 `;
 
-exports[`KeepLink Fragment should work with fragments 1`] = `
+exports[`KeepLink with if Fragment should work with fragments 1`] = `
 "query someQuery {
   deeply {
     nested {
-      ...queryFragment
+      ...ifQueryFragment
     }
   }
 }
 
-fragment queryFragment on Type 
+fragment ifQueryFragment on Type 
 "
 `;
 
-exports[`KeepLink should remove directives and fields if shouldKeep is false 1`] = `
+exports[`KeepLink with if should remove directives and fields if shouldKeep is false 1`] = `
 "query someQuery {
   test {
     some
@@ -68,7 +81,75 @@ exports[`KeepLink should remove directives and fields if shouldKeep is false 1`]
 "
 `;
 
-exports[`KeepLink should should keep fields, but remove directives if shouldKeep is true 1`] = `
+exports[`KeepLink with if should should keep fields, but remove directives if shouldKeep is true 1`] = `
+"query someQuery {
+  test {
+    some
+  }
+  field {
+    subFieldA
+    subFieldB
+  }
+}
+"
+`;
+
+exports[`KeepLink with ifFeature Aliases should properly map aliases 1`] = `
+"query someQuery {
+  aliasForDeeply: deeply {
+    nested {
+      ...someOtherIfFeatureFragment
+    }
+  }
+}
+
+fragment someOtherIfFeatureFragment on Type 
+"
+`;
+
+exports[`KeepLink with ifFeature Field Arguments should keep variables if they are used elsewhere 1`] = `
+"query someQuery($argValue: String!) {
+  someOther {
+    subFieldOther(someArg: $argValue) {
+      subSubFieldOther
+    }
+  }
+}
+"
+`;
+
+exports[`KeepLink with ifFeature Field Arguments should remove argument variables if exists 1`] = `
+"query someQuery {
+  someOther {
+    subFieldOther
+  }
+}
+"
+`;
+
+exports[`KeepLink with ifFeature Fragment should work with fragments 1`] = `
+"query someQuery {
+  deeply {
+    nested {
+      ...ifFeatureQueryFragment
+    }
+  }
+}
+
+fragment ifFeatureQueryFragment on Type 
+"
+`;
+
+exports[`KeepLink with ifFeature should remove directives and fields if feature1 is not enabled 1`] = `
+"query someQuery {
+  test {
+    some
+  }
+}
+"
+`;
+
+exports[`KeepLink with ifFeature should should keep fields, but remove directives if feature1 is enabled 1`] = `
 "query someQuery {
   test {
     some
