@@ -49,6 +49,12 @@ jobs:
         with:
           branch: gh-pages
           folder: build/docs
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
 
