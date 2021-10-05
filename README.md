@@ -34,7 +34,7 @@ Available from the `npm` package registry with
     const keepLink = new KeepLink()
 
     // if you want to use ifFeature conditions, add also the following line, otherwise skip it:
-    keepLink.setEnabledFeatures([ 'feature1' ])
+    keepLink.enabledFeatures = [ 'feature1' ]
 
     const apolloClient = new ApolloClient({
       link: from([

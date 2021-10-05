@@ -64,9 +64,9 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
 }
 
 export class KeepLink extends ApolloLink {
-  _enabledFeatures: Array<string> = []
+  private _enabledFeatures: string[] = []
 
-  setEnabledFeatures(features: Array<string>): void {
+  public set enabledFeatures(features: string[]) {
     this._enabledFeatures = features
   }
 
