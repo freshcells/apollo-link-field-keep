@@ -33,6 +33,9 @@ Available from the `npm` package registry with
 
     const keepLink = new KeepLink()
 
+    // if you want to use ifFeature conditions, add also the following line, otherwise skip it:
+    keepLink.enabledFeatures = [ 'feature1' ]
+
     const apolloClient = new ApolloClient({
       link: from([
         keepLink,
@@ -59,5 +62,43 @@ query someQuery($argValue: String! $shouldKeep: Boolean!) {
 
 If `$shouldKeep` in this example is `false`, it will remove the whole `field` query including arguments.
 It will also clean up all variables that might be used (if not used by other fields).
+
+If you have a query that is used in multiple components and needs to include a certain field everywhere,
+you can use `ifFeature` instead of `if` as:
+
+```graphql
+query someQuery($argValue: String!) {
+      someOther {
+        subFieldOther(someArg: $argValue) {
+          subSubFieldOther
+        }
+      }
+      field(someArg: $argValue) @keep(ifFeature: "feature1") {
+        subFieldA
+        subFieldB
+      }
+}
+```
+
+It will work exactly the same way as `$shouldKeep` in the previous example. With this approach you just save time 
+as you do not need to pass the same variables to all query use cases.
+
+It is also possible to combine `if` and `ifFeature`:
+
+```graphql
+query someQuery($argValue: String! $shouldKeep: Boolean!) {
+      someOther {
+        subFieldOther(someArg: $argValue) {
+          subSubFieldOther
+        }
+      }
+      field(someArg: $argValue) @keep(if: $shouldKeep ifFeature: "feature1") {
+        subFieldA
+        subFieldB
+      }
+}
+```
+
+In this case the fields will only be included if both `$shouldKeep` is true and `feature1` is enabled.
 
 To prevent Apollo Cache issues it will fill the field with `null` when returned from the server.
