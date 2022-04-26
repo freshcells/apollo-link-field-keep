@@ -184,7 +184,7 @@ export const setInObject = <T extends Record<string | number, any>>(
     }
     pointer = pointer[key]
     if (Array.isArray(pointer)) {
-      const sliced = path.splice(index + 1, path.length)
+      const sliced = Array.from(path).splice(index + 1, path.length)
       pointer.forEach((item) => {
         setInObject(item, sliced, value)
       })
