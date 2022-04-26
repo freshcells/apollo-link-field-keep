@@ -91,7 +91,10 @@ export class KeepLink extends ApolloLink {
       return new Observable((observer) => {
         const obs = forward(operation)
         return obs.subscribe({
-          next({ data, errors }: FetchResult<Record<string|number, unknown>>) {
+          next({
+            data,
+            errors,
+          }: FetchResult<Record<string | number, unknown>>) {
             nullFields.forEach((fields) => {
               // To fix issues with apollo caching, we pretend that the server still returns the fields
               // but with null values, this is according to the GraphQL spec.
