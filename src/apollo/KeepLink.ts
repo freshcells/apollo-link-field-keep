@@ -41,8 +41,7 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
             )
             if (args.ifFeature !== undefined && args.if !== undefined) {
               return !(
-                args.if === true &&
-                enabledFeatures.indexOf(args.ifFeature) !== -1
+                args.if && enabledFeatures.indexOf(args.ifFeature) !== -1
               )
             }
             if (args.ifFeature) {
@@ -70,7 +69,12 @@ export class KeepLink extends ApolloLink {
     this._enabledFeatures = features
   }
 
-  request(operation: Operation, forward: NextLink): Observable<any> {
+  constructor(features: string[] = []) {
+    super()
+    this._enabledFeatures = features
+  }
+
+  request(operation: Operation, forward: NextLink): Observable<FetchResult> {
     const directives = `directive @${DIRECTIVE} on FIELD`
 
     operation.setContext(({ schemas = [] }) => ({
@@ -87,7 +91,10 @@ export class KeepLink extends ApolloLink {
       return new Observable((observer) => {
         const obs = forward(operation)
         return obs.subscribe({
-          next({ data, errors }: FetchResult) {
+          next({
+            data,
+            errors,
+          }: FetchResult<Record<string | number, unknown>>) {
             nullFields.forEach((fields) => {
               // To fix issues with apollo caching, we pretend that the server still returns the fields
               // but with null values, this is according to the GraphQL spec.

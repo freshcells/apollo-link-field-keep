@@ -23,9 +23,7 @@
     "listFiles": false /* Print names of files part of the compilation. */,
     "pretty": true /* Stylize errors and messages using color and context. */,
 
-    "lib": ["es2018", "dom"],
-    "typeRoots": ["node_modules/@types"],
-    "types": ["@types/jest"]
+    "lib": ["es2018", "dom"]
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules"],
