@@ -595,6 +595,37 @@ describe('utilities', () => {
   })
 })
 
+describe('fragments', () => {
+  it('should remove unused fragments', () => {
+    const queryWithFragments = gql`
+      fragment myFragment on SomeType {
+        field @keep(ifFeature: "someFeature")
+      }
+      query myQuery {
+        field {
+          someOtherKey
+          ...myFragment
+        }
+      }
+    `
+    const { nullFields, modifiedDoc } = removeIgnoreSetsFromDocument(
+      queryWithFragments,
+      {},
+      []
+    )
+    expect(nullFields).toEqual([['field', 'field']])
+    expect(print(modifiedDoc)).toEqual(
+      print(gql`
+        query myQuery {
+          field {
+            someOtherKey
+          }
+        }
+      `)
+    )
+  })
+})
+
 describe('complex nested mutations and fragments', () => {
   const complexNested = gql`
     fragment level2 on OtherType {

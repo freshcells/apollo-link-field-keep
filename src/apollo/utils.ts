@@ -5,7 +5,6 @@ import type {
   FragmentDefinitionNode,
   FragmentSpreadNode,
   OperationDefinitionNode,
-  SelectionSetNode,
   VariableDefinitionNode,
   ArgumentNode,
   SelectionNode,
@@ -17,14 +16,10 @@ import {
   removeArgumentsFromDocument,
   FragmentMap,
   GetDirectiveConfig,
-  RemoveFragmentSpreadConfig,
-  removeFragmentSpreadFromDocument,
   getFragmentDefinition,
   getFragmentDefinitions,
   getOperationDefinition,
   createFragmentMap,
-  isField,
-  isInlineFragment,
 } from 'apollo-utilities'
 
 interface RemoveDirectiveConfig {
@@ -63,27 +58,6 @@ function getDirectiveMatcher(
         (dir.test && dir.test(directive))
     )
   }
-}
-
-function getAllFragmentSpreadsFromSelectionSet(
-  selectionSet: SelectionSetNode
-): FragmentSpreadNode[] {
-  const allFragments: FragmentSpreadNode[] = []
-
-  selectionSet.selections.forEach((selection) => {
-    if (
-      (isField(selection) || isInlineFragment(selection)) &&
-      selection.selectionSet
-    ) {
-      getAllFragmentSpreadsFromSelectionSet(
-        selection.selectionSet as SelectionSetNode
-      ).forEach((frag) => allFragments.push(frag))
-    } else if (selection.kind === 'FragmentSpread') {
-      allFragments.push(selection)
-    }
-  })
-
-  return allFragments
 }
 
 export const getFieldName = (node: FieldNode): string => {
@@ -230,8 +204,6 @@ export function removeDirectivesFromDocument(
   const variablesInUse = Object.create(null)
   const variablesToRemove: RemoveArgumentsConfig[] = []
   const nodesToRemove: FieldNodeCollection = []
-  const fragmentSpreadsInUse = Object.create(null)
-  const fragmentSpreadsToRemove: RemoveFragmentSpreadConfig[] = []
 
   const removeVariables = (arg: ArgumentNode) => {
     if (arg.value.kind === 'Variable') {
@@ -257,7 +229,6 @@ export function removeDirectivesFromDocument(
           }
         },
       },
-
       Field: {
         enter(node) {
           if (directives && node.directives) {
@@ -284,31 +255,11 @@ export function removeDirectivesFromDocument(
                 // from the operation definition.
                 node.arguments.forEach(removeVariables)
               }
-
-              if (node.selectionSet) {
-                // Store fragment spread names so they can be removed from the
-                // document.
-                getAllFragmentSpreadsFromSelectionSet(
-                  node.selectionSet
-                ).forEach((frag) => {
-                  fragmentSpreadsToRemove.push({
-                    name: frag.name.value,
-                  })
-                })
-              }
               // Remove the field.
               return null
             }
           }
           return node
-        },
-      },
-
-      FragmentSpread: {
-        enter(node) {
-          // Keep track of referenced fragment spreads. This is used to
-          // determine if top level fragment definitions should be removed.
-          fragmentSpreadsInUse[node.name.value] = true
         },
       },
       Directive: {
@@ -339,31 +290,30 @@ export function removeDirectivesFromDocument(
     )
   }
 
-  // If we've removed selection sets with fragment spreads, make sure the
-  // associated fragment definitions are also removed from the rest of the
-  // document, as long as they aren't being used elsewhere.
-  if (
-    modifiedDoc &&
-    filterInPlace(
-      fragmentSpreadsToRemove,
-      (fs) => !fragmentSpreadsInUse[fs.name as string]
-    ).length
-  ) {
-    modifiedDoc = <DocumentNode>(
-      removeFragmentSpreadFromDocument(fragmentSpreadsToRemove, modifiedDoc)
-    )
-  }
-
   // Remove inline fragments which have empty selections
 
   if (modifiedDoc) {
     modifiedDoc = <DocumentNode>visit(modifiedDoc, {
       InlineFragment: {
         enter(node) {
-          if (node.selectionSet.selections.length === 0) {
-            return null
-          }
-          return node
+          return node.selectionSet.selections.length === 0 ? null : node
+        },
+      },
+      FragmentDefinition: {
+        enter(node) {
+          return node.selectionSet.selections.length === 0 ? null : node
+        },
+      },
+      FragmentSpread: {
+        enter(node) {
+          const fragmentEmpty = modifiedDoc?.definitions?.find((def) => {
+            return (
+              def.kind === 'FragmentDefinition' &&
+              def.name.value === node.name.value &&
+              def.selectionSet?.selections?.length === 0
+            )
+          })
+          return fragmentEmpty ? null : node
         },
       },
     })
