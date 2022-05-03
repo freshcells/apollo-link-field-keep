@@ -39,16 +39,48 @@ exports[` 3`] = `
 "
 `;
 
-exports[`KeepLink with if Aliases should properly map aliases 1`] = `
-"query someQuery {
-  aliasForDeeply: deeply {
-    nested {
-      ...someOtherIfFragment
-    }
+exports[` 4`] = `
+"fragment level2 on OtherType {
+  nice
+  to
+}
+
+fragment level1 on MyType {
+  label
+  goesToLevel2 {
+    ...level2
   }
 }
 
-fragment someOtherIfFragment on Type 
+mutation complexWithNestedFragments {
+  complexWithNestedFragments {
+    nested {
+      ...level1
+    }
+  }
+}
+"
+`;
+
+exports[` 5`] = `
+"mutation complexWithNestedFragments {
+  complexWithNestedFragments {
+    nested {
+      ... on SomeType {
+        primaryFunction
+      }
+    }
+  }
+}
+"
+`;
+
+exports[`KeepLink with if Aliases should properly map aliases 1`] = `
+"query someQuery {
+  aliasForDeeply: deeply {
+    nested
+  }
+}
 "
 `;
 
@@ -63,7 +95,7 @@ exports[`KeepLink with if Field Arguments should keep variables if they are used
 "
 `;
 
-exports[`KeepLink with if Field Arguments should remove argument variables if exists 1`] = `
+exports[`KeepLink with if Field Arguments should remove query argument variables if exists 1`] = `
 "query someQuery {
   someOther {
     subFieldOther
@@ -75,26 +107,18 @@ exports[`KeepLink with if Field Arguments should remove argument variables if ex
 exports[`KeepLink with if Fragment should work with fragments 1`] = `
 "query someQuery {
   deeply {
-    nested {
-      ...ifQueryFragment
-    }
+    nested
   }
 }
-
-fragment ifQueryFragment on Type 
 "
 `;
 
 exports[`KeepLink with if and ifFeature Aliases should properly map aliases 1`] = `
 "query someQuery {
   aliasForDeeply: deeply {
-    nested {
-      ...someOtherIfAndIfFeatureFragment
-    }
+    nested
   }
 }
-
-fragment someOtherIfAndIfFeatureFragment on Type 
 "
 `;
 
@@ -121,13 +145,9 @@ exports[`KeepLink with if and ifFeature Field Arguments should remove argument v
 exports[`KeepLink with if and ifFeature Fragment should work with fragments 1`] = `
 "query someQuery {
   deeply {
-    nested {
-      ...ifAndIfFeatureQueryFragment
-    }
+    nested
   }
 }
-
-fragment ifAndIfFeatureQueryFragment on Type 
 "
 `;
 
@@ -178,13 +198,9 @@ exports[`KeepLink with if should remove directives and fields if shouldKeep is f
 exports[`KeepLink with ifFeature Aliases should properly map aliases 1`] = `
 "query someQuery {
   aliasForDeeply: deeply {
-    nested {
-      ...someOtherIfFeatureFragment
-    }
+    nested
   }
 }
-
-fragment someOtherIfFeatureFragment on Type 
 "
 `;
 
@@ -211,13 +227,9 @@ exports[`KeepLink with ifFeature Field Arguments should remove argument variable
 exports[`KeepLink with ifFeature Fragment should work with fragments 1`] = `
 "query someQuery {
   deeply {
-    nested {
-      ...ifFeatureQueryFragment
-    }
+    nested
   }
 }
-
-fragment ifFeatureQueryFragment on Type 
 "
 `;
 

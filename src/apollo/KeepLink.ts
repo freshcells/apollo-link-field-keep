@@ -8,7 +8,7 @@ import {
 } from '@apollo/client'
 import { argumentsObjectFromField } from 'apollo-utilities'
 import {
-  findOriginalPaths,
+  findNodePaths,
   removeDirectivesFromDocument,
   setInObject,
 } from './utils'
@@ -25,7 +25,7 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
   variables: Record<string, any>,
   enabledFeatures: Array<string>
 ): { modifiedDoc: T; nullFields: Array<Array<string | number>> } {
-  const { modifiedDoc, pathsToRemove } = removeDirectivesFromDocument(
+  const { modifiedDoc, nodesToRemove } = removeDirectivesFromDocument(
     [
       {
         // if the directive should be removed
@@ -57,7 +57,7 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
   )
 
   // The field path's where we have set null later
-  const nullFields = findOriginalPaths(pathsToRemove, document)
+  const nullFields = findNodePaths(nodesToRemove, document)
 
   return { modifiedDoc: modifiedDoc as T, nullFields }
 }

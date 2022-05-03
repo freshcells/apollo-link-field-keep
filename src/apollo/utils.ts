@@ -5,10 +5,9 @@ import type {
   FragmentDefinitionNode,
   FragmentSpreadNode,
   OperationDefinitionNode,
-  SelectionSetNode,
   VariableDefinitionNode,
-  DefinitionNode,
   ArgumentNode,
+  SelectionNode,
 } from 'graphql'
 import { visit } from 'graphql/language/visitor'
 import { filterInPlace } from 'apollo-utilities/lib/util/filterInPlace'
@@ -17,14 +16,10 @@ import {
   removeArgumentsFromDocument,
   FragmentMap,
   GetDirectiveConfig,
-  RemoveFragmentSpreadConfig,
-  removeFragmentSpreadFromDocument,
   getFragmentDefinition,
   getFragmentDefinitions,
   getOperationDefinition,
   createFragmentMap,
-  isField,
-  isInlineFragment,
 } from 'apollo-utilities'
 
 interface RemoveDirectiveConfig {
@@ -65,99 +60,106 @@ function getDirectiveMatcher(
   }
 }
 
-function getAllFragmentSpreadsFromSelectionSet(
-  selectionSet: SelectionSetNode
-): FragmentSpreadNode[] {
-  const allFragments: FragmentSpreadNode[] = []
-
-  selectionSet.selections.forEach((selection) => {
-    if (
-      (isField(selection) || isInlineFragment(selection)) &&
-      selection.selectionSet
-    ) {
-      getAllFragmentSpreadsFromSelectionSet(
-        selection.selectionSet as SelectionSetNode
-      ).forEach((frag) => allFragments.push(frag))
-    } else if (selection.kind === 'FragmentSpread') {
-      allFragments.push(selection)
-    }
-  })
-
-  return allFragments
-}
-
 export const getFieldName = (node: FieldNode): string => {
   return node.alias?.value || node.name?.value
 }
 
-type PossibleDocuments =
-  | DocumentNode
-  | FragmentDefinitionNode
-  | FieldNode
-  | ReadonlyArray<DefinitionNode>
-type Keys = keyof PossibleDocuments
+type FieldNodeCollection = Array<FieldNode>
+type FragmentsMap = { [key: string]: FragmentDefinitionNode }
 
-export const collectSelectionPath = (
-  path: ReadonlyArray<string | number>,
-  document: DocumentNode
-): (string | number)[] => {
-  let pointer: PossibleDocuments = document
-  const fieldPath: Array<string | number> = []
-  path.forEach((key) => {
-    pointer = pointer[key as Keys]
-    if ((pointer as unknown as FieldNode).kind === 'Field') {
-      fieldPath.push(getFieldName(pointer as unknown as FieldNode))
+const walkSelections = (
+  selections: readonly SelectionNode[],
+  parentPath: readonly string[],
+  allFragments: FragmentsMap,
+  nodes: FieldNode[]
+) => {
+  return selections.reduce((next, node) => {
+    let nextPath: Array<Array<string>> = []
+    if (node.kind === 'InlineFragment') {
+      nextPath = [
+        ...nextPath,
+        ...walkSelections(
+          node.selectionSet.selections,
+          parentPath,
+          allFragments,
+          nodes
+        ),
+      ]
     }
-  })
-  return fieldPath
+    if (node.kind === 'FragmentSpread') {
+      const fragment: FragmentDefinitionNode | undefined =
+        allFragments[(node as FragmentSpreadNode).name.value]
+      if (fragment) {
+        nextPath = [
+          ...nextPath,
+          ...walkSelections(
+            fragment.selectionSet.selections,
+            parentPath,
+            allFragments,
+            nodes
+          ),
+        ]
+      }
+    }
+    let path: string[] = []
+    if (node.kind === 'Field') {
+      if (nodes.indexOf(node) !== -1) {
+        path = [...parentPath, getFieldName(node)]
+      }
+      if (node.selectionSet) {
+        nextPath = [
+          ...nextPath,
+          ...walkSelections(
+            node.selectionSet.selections,
+            [...parentPath, getFieldName(node)],
+            allFragments,
+            nodes
+          ),
+        ]
+      }
+    }
+    return path.length > 0
+      ? [path, ...nextPath, ...next]
+      : [...nextPath, ...next]
+  }, [] as Array<Array<string>>)
 }
 
-type RemovablePaths = Array<{ field: string; path: Array<string | number> }>
+const findNodePathInDocument = (document: DocumentNode, nodes: FieldNode[]) => {
+  const operationDefinition: OperationDefinitionNode | undefined =
+    document.definitions.find((def) => def.kind === 'OperationDefinition') as
+      | OperationDefinitionNode
+      | undefined
 
-export const findOriginalPaths = (
-  paths: RemovablePaths,
+  const allFragmentsInDocument = (
+    document.definitions.filter(
+      (m) => m.kind === 'FragmentDefinition'
+    ) as FragmentDefinitionNode[]
+  ).reduce((next, fragment) => {
+    return {
+      [fragment.name.value]: fragment,
+      ...next,
+    }
+  }, {} as { [key: string]: FragmentDefinitionNode })
+
+  if (operationDefinition) {
+    return walkSelections(
+      operationDefinition.selectionSet.selections,
+      [],
+      allFragmentsInDocument,
+      nodes
+    )
+  }
+  return []
+}
+
+export const findNodePaths = (
+  paths: FieldNodeCollection,
   document: DocumentNode | null
 ): Array<Array<string | number>> => {
   if (document === null) {
     return []
   }
-  return paths.map((v) => {
-    const fieldNames: Array<string | number> = []
-    let pointer: PossibleDocuments = document
-    let lastFragment: string | null = null
-    const fragments: Record<string, Array<string | number>> = {}
-    v.path.forEach((key) => {
-      pointer = pointer[key as Keys]
-      // 1. If we deal with fragment definitions, we save them
-      // 2. ...and then we require to find the fragment and apply the right path to it.
-      if (
-        (pointer as unknown as FragmentDefinitionNode).kind ===
-        'FragmentDefinition'
-      ) {
-        lastFragment = (pointer as unknown as FragmentDefinitionNode).name.value
-        fragments[lastFragment] = []
-      }
-      if ((pointer as unknown as FieldNode).kind === 'Field') {
-        ;(lastFragment ? fragments[lastFragment] : fieldNames).push(
-          getFieldName(pointer as unknown as FieldNode)
-        )
-      }
-    })
-    const possibleFragments = Object.keys(fragments)
-    if (possibleFragments.length > 0) {
-      visit(document, {
-        FragmentSpread: {
-          enter: (node: FragmentSpreadNode, index, parent, path) => {
-            if (fragments[node.name.value]) {
-              const fragmentPath = collectSelectionPath(path, document)
-              fieldNames.push(...fragmentPath, ...fragments[node.name.value])
-            }
-          },
-        },
-      })
-    }
-    return fieldNames
-  })
+  return findNodePathInDocument(document, paths)
 }
 
 /**
@@ -198,12 +200,10 @@ export const setInObject = <T extends Record<string | number, any>>(
 export function removeDirectivesFromDocument(
   directives: RemoveDirectiveConfig[],
   doc: DocumentNode
-): { modifiedDoc: DocumentNode | null; pathsToRemove: RemovablePaths } {
+): { modifiedDoc: DocumentNode | null; nodesToRemove: FieldNodeCollection } {
   const variablesInUse = Object.create(null)
   const variablesToRemove: RemoveArgumentsConfig[] = []
-  const pathsToRemove: Array<{ field: string; path: (string | number)[] }> = []
-  const fragmentSpreadsInUse = Object.create(null)
-  const fragmentSpreadsToRemove: RemoveFragmentSpreadConfig[] = []
+  const nodesToRemove: FieldNodeCollection = []
 
   const removeVariables = (arg: ArgumentNode) => {
     if (arg.value.kind === 'Variable') {
@@ -229,9 +229,8 @@ export function removeDirectivesFromDocument(
           }
         },
       },
-
       Field: {
-        enter(node, key, parent, path) {
+        enter(node) {
           if (directives && node.directives) {
             // If `remove` is set to true for a directive, and a directive match
             // is found for a field, remove the field as well.
@@ -250,23 +249,11 @@ export function removeDirectivesFromDocument(
               )
             }
             if (shouldRemoveField && node.directives && matches) {
-              pathsToRemove.push({ field: node.name.value, path: [...path] })
+              nodesToRemove.push(node)
               if (node.arguments) {
                 // Store field argument variables so they can be removed
                 // from the operation definition.
                 node.arguments.forEach(removeVariables)
-              }
-
-              if (node.selectionSet) {
-                // Store fragment spread names so they can be removed from the
-                // document.
-                getAllFragmentSpreadsFromSelectionSet(
-                  node.selectionSet
-                ).forEach((frag) => {
-                  fragmentSpreadsToRemove.push({
-                    name: frag.name.value,
-                  })
-                })
               }
               // Remove the field.
               return null
@@ -275,15 +262,6 @@ export function removeDirectivesFromDocument(
           return node
         },
       },
-
-      FragmentSpread: {
-        enter(node) {
-          // Keep track of referenced fragment spreads. This is used to
-          // determine if top level fragment definitions should be removed.
-          fragmentSpreadsInUse[node.name.value] = true
-        },
-      },
-
       Directive: {
         enter(node) {
           // If a matching directive is found, remove it.
@@ -312,20 +290,34 @@ export function removeDirectivesFromDocument(
     )
   }
 
-  // If we've removed selection sets with fragment spreads, make sure the
-  // associated fragment definitions are also removed from the rest of the
-  // document, as long as they aren't being used elsewhere.
-  if (
-    modifiedDoc &&
-    filterInPlace(
-      fragmentSpreadsToRemove,
-      (fs) => !fragmentSpreadsInUse[fs.name as string]
-    ).length
-  ) {
-    modifiedDoc = <DocumentNode>(
-      removeFragmentSpreadFromDocument(fragmentSpreadsToRemove, modifiedDoc)
-    )
+  // Remove inline fragments which have empty selections
+
+  if (modifiedDoc) {
+    modifiedDoc = <DocumentNode>visit(modifiedDoc, {
+      InlineFragment: {
+        enter(node) {
+          return node.selectionSet.selections.length === 0 ? null : node
+        },
+      },
+      FragmentDefinition: {
+        enter(node) {
+          return node.selectionSet.selections.length === 0 ? null : node
+        },
+      },
+      FragmentSpread: {
+        enter(node) {
+          const fragmentEmpty = modifiedDoc?.definitions?.find((def) => {
+            return (
+              def.kind === 'FragmentDefinition' &&
+              def.name.value === node.name.value &&
+              def.selectionSet?.selections?.length === 0
+            )
+          })
+          return fragmentEmpty ? null : node
+        },
+      },
+    })
   }
 
-  return { pathsToRemove, modifiedDoc }
+  return { nodesToRemove, modifiedDoc }
 }
