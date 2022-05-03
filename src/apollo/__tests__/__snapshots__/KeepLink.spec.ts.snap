@@ -39,6 +39,42 @@ exports[` 3`] = `
 "
 `;
 
+exports[` 4`] = `
+"fragment level2 on OtherType {
+  nice
+  to
+}
+
+fragment level1 on MyType {
+  label
+  goesToLevel2 {
+    ...level2
+  }
+}
+
+mutation complexWithNestedFragments {
+  complexWithNestedFragments {
+    nested {
+      ...level1
+    }
+  }
+}
+"
+`;
+
+exports[` 5`] = `
+"mutation complexWithNestedFragments {
+  complexWithNestedFragments {
+    nested {
+      ... on SomeType {
+        primaryFunction
+      }
+    }
+  }
+}
+"
+`;
+
 exports[`KeepLink with if Aliases should properly map aliases 1`] = `
 "query someQuery {
   aliasForDeeply: deeply {
@@ -58,15 +94,6 @@ exports[`KeepLink with if Field Arguments should keep variables if they are used
     subFieldOther(someArg: $argValue) {
       subSubFieldOther
     }
-  }
-}
-"
-`;
-
-exports[`KeepLink with if Field Arguments should remove argument variables if exists 1`] = `
-"query someQuery {
-  someOther {
-    subFieldOther
   }
 }
 "

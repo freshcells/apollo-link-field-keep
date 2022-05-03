@@ -62,17 +62,6 @@ describe('KeepLink with if', () => {
       }
     `
 
-    it('should remove argument variables if exists', () => {
-      const { modifiedDoc } = removeIgnoreSetsFromDocument(
-        queryWithArgument,
-        {
-          shouldKeep: false,
-          argValue: 'test',
-        },
-        []
-      )
-      expect(print(modifiedDoc)).toMatchSnapshot()
-    })
     it('should keep variables if they are used elsewhere', () => {
       const { modifiedDoc } = removeIgnoreSetsFromDocument(
         queryWithArgumentAndUsedElsewhere,
@@ -592,4 +581,72 @@ describe('utilities', () => {
       expect(object).toEqual({})
     })
   })
+})
+
+describe('complex nested mutations and fragments', () => {
+  const complexNested = gql`
+    fragment level2 on OtherType {
+      nice
+      to
+      have @keep(ifFeature: "someFeature")
+      some @keep(ifFeature: "someFeature") {
+        subselection
+      }
+    }
+    fragment level1 on MyType {
+      label
+      oneOnLevel1 @keep(ifFeature: "someFeature")
+      goesToLevel2 {
+        ...level2
+      }
+    }
+    mutation complexWithNestedFragments {
+      complexWithNestedFragments {
+        nested {
+          firstLevelKey @keep(ifFeature: "someFeature")
+          ...level1
+        }
+      }
+    }
+  `
+
+  const { nullFields, modifiedDoc } = removeIgnoreSetsFromDocument(
+      complexNested,
+      {},
+      []
+  )
+  expect(nullFields).toEqual([
+    ['complexWithNestedFragments', 'nested', 'goesToLevel2', 'some'],
+    ['complexWithNestedFragments', 'nested', 'goesToLevel2', 'have'],
+    ['complexWithNestedFragments', 'nested', 'oneOnLevel1'],
+    ['complexWithNestedFragments', 'nested', 'firstLevelKey'],
+  ])
+  expect(print(modifiedDoc)).toMatchSnapshot()
+})
+describe('handle inline fragments', () => {
+  const inlineFragment = gql`
+    mutation complexWithNestedFragments {
+      complexWithNestedFragments {
+        nested {
+          ... on SomeType {
+            firstLevelKey @keep(ifFeature: "someFeature")
+            primaryFunction
+            ... on SomeOtherType {
+              deeper @keep(ifFeature: "someFeature")
+            }
+          }
+        }
+      }
+    }
+  `
+  const { nullFields, modifiedDoc } = removeIgnoreSetsFromDocument(
+      inlineFragment,
+      {},
+      []
+  )
+  expect(nullFields).toEqual([
+    ['complexWithNestedFragments', 'nested', 'deeper'],
+    ['complexWithNestedFragments', 'nested', 'firstLevelKey'],
+  ])
+  expect(print(modifiedDoc)).toMatchSnapshot()
 })
