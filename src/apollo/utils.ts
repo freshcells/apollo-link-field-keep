@@ -364,7 +364,7 @@ export function removeDirectivesFromDocument(
             return null
           }
           return node
-        }
+        },
       },
     })
   }

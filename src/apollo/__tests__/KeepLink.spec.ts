@@ -62,6 +62,18 @@ describe('KeepLink with if', () => {
       }
     `
 
+    it('should remove query argument variables if exists', () => {
+      const { modifiedDoc } = removeIgnoreSetsFromDocument(
+        queryWithArgument,
+        {
+          shouldKeep: false,
+          argValue: 'test',
+        },
+        []
+      )
+      expect(print(modifiedDoc)).toMatchSnapshot()
+    })
+
     it('should keep variables if they are used elsewhere', () => {
       const { modifiedDoc } = removeIgnoreSetsFromDocument(
         queryWithArgumentAndUsedElsewhere,
@@ -611,9 +623,9 @@ describe('complex nested mutations and fragments', () => {
   `
 
   const { nullFields, modifiedDoc } = removeIgnoreSetsFromDocument(
-      complexNested,
-      {},
-      []
+    complexNested,
+    {},
+    []
   )
   expect(nullFields).toEqual([
     ['complexWithNestedFragments', 'nested', 'goesToLevel2', 'some'],
@@ -640,9 +652,9 @@ describe('handle inline fragments', () => {
     }
   `
   const { nullFields, modifiedDoc } = removeIgnoreSetsFromDocument(
-      inlineFragment,
-      {},
-      []
+    inlineFragment,
+    {},
+    []
   )
   expect(nullFields).toEqual([
     ['complexWithNestedFragments', 'nested', 'deeper'],

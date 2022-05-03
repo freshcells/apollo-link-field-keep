@@ -99,6 +99,15 @@ exports[`KeepLink with if Field Arguments should keep variables if they are used
 "
 `;
 
+exports[`KeepLink with if Field Arguments should remove query argument variables if exists 1`] = `
+"query someQuery {
+  someOther {
+    subFieldOther
+  }
+}
+"
+`;
+
 exports[`KeepLink with if Fragment should work with fragments 1`] = `
 "query someQuery {
   deeply {
