@@ -75,6 +75,40 @@ exports[` 5`] = `
 "
 `;
 
+exports[`Default Variables should handle multiple default variables correctly 1`] = `
+"query someQuery($otherVar: String = \\"default\\") {
+  test {
+    some
+  }
+  otherField(arg: $otherVar) {
+    data
+  }
+}
+"
+`;
+
+exports[`Default Variables should override default value when variable is explicitly provided 1`] = `
+"query someQuery {
+  test {
+    some
+  }
+}
+"
+`;
+
+exports[`Default Variables should use default value when variable is not provided 1`] = `
+"query someQuery {
+  test {
+    some
+  }
+  field {
+    subFieldA
+    subFieldB
+  }
+}
+"
+`;
+
 exports[`KeepLink with if Aliases should properly map aliases 1`] = `
 "query someQuery {
   aliasForDeeply: deeply {

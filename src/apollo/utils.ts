@@ -201,10 +201,9 @@ export function removeDirectivesFromDocument(
   directives: RemoveDirectiveConfig[],
   doc: DocumentNode
 ): { modifiedDoc: DocumentNode | null; nodesToRemove: FieldNodeCollection } {
-  const variablesInUse = Object.create(null)
+  const variablesInUse: Record<string, boolean> = {}
   const variablesToRemove: RemoveArgumentsConfig[] = []
   const nodesToRemove: FieldNodeCollection = []
-
   const removeVariables = (arg: ArgumentNode) => {
     if (arg.value.kind === 'Variable') {
       variablesToRemove.push({
@@ -231,7 +230,7 @@ export function removeDirectivesFromDocument(
       },
       Field: {
         enter(node) {
-          if (directives && node.directives) {
+          if (directives && node.directives?.length) {
             // If `remove` is set to true for a directive, and a directive match
             // is found for a field, remove the field as well.
             const shouldRemoveField = directives.some(
@@ -259,7 +258,7 @@ export function removeDirectivesFromDocument(
               return null
             }
           }
-          return node
+          return
         },
       },
       Directive: {
@@ -271,11 +270,15 @@ export function removeDirectivesFromDocument(
             }
             return null
           }
-          return node
+          return
         },
       },
     })
   )
+
+  if (modifiedDoc === doc) {
+    return { nodesToRemove: [], modifiedDoc: doc }
+  }
 
   // If we've removed fields with arguments, make sure the associated
   // variables are also removed from the rest of the document, as long as they

@@ -3,6 +3,93 @@ import { print } from 'graphql/language/printer'
 import { removeIgnoreSetsFromDocument } from '../KeepLink'
 import { setInObject } from '../utils'
 
+describe('A document without `@keep`', () => {
+  const queryWithDefaults = gql`
+    query someQuery {
+      test {
+        some
+      }
+      field {
+        subFieldA
+        subFieldB
+      }
+    }
+  `
+  it('should not modify the document', () => {
+    const { modifiedDoc } = removeIgnoreSetsFromDocument(
+      queryWithDefaults,
+      {},
+      []
+    )
+    expect(modifiedDoc).toBe(queryWithDefaults)
+  })
+  it('should work with a second time with caches', () => {
+    const { modifiedDoc } = removeIgnoreSetsFromDocument(
+      queryWithDefaults,
+      {},
+      []
+    )
+    expect(modifiedDoc).toBe(queryWithDefaults)
+  })
+})
+describe('Default Variables', () => {
+  const queryWithDefaults = gql`
+    query someQuery($shouldKeep: Boolean = true) {
+      test {
+        some
+      }
+      field @keep(if: $shouldKeep) {
+        subFieldA
+        subFieldB
+      }
+    }
+  `
+
+  it('should use default value when variable is not provided', () => {
+    const { modifiedDoc } = removeIgnoreSetsFromDocument(
+      queryWithDefaults,
+      {}, // No variables provided, should use default value true
+      []
+    )
+    expect(print(modifiedDoc)).toMatchSnapshot()
+  })
+
+  it('should override default value when variable is explicitly provided', () => {
+    const { modifiedDoc } = removeIgnoreSetsFromDocument(
+      queryWithDefaults,
+      { shouldKeep: false }, // Override default value
+      []
+    )
+    expect(print(modifiedDoc)).toMatchSnapshot()
+  })
+
+  const queryWithMultipleDefaults = gql`
+    query someQuery(
+      $shouldKeep: Boolean = false
+      $otherVar: String = "default"
+    ) {
+      test {
+        some
+      }
+      field @keep(if: $shouldKeep) {
+        subFieldA
+        subFieldB
+      }
+      otherField(arg: $otherVar) {
+        data
+      }
+    }
+  `
+
+  it('should handle multiple default variables correctly', () => {
+    const { modifiedDoc } = removeIgnoreSetsFromDocument(
+      queryWithMultipleDefaults,
+      { otherVar: 'custom' }, // Only override otherVar, shouldKeep should use default false
+      []
+    )
+    expect(print(modifiedDoc)).toMatchSnapshot()
+  })
+})
 describe('KeepLink with if', () => {
   const query = gql`
     query someQuery($shouldKeep: Boolean!) {
