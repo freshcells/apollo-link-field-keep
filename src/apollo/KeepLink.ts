@@ -1,8 +1,4 @@
-import type {
-  DocumentNode,
-  DirectiveNode,
-  OperationDefinitionNode,
-} from 'graphql'
+import type { DocumentNode, DirectiveNode } from 'graphql'
 import {
   ApolloLink,
   Observable,
@@ -10,7 +6,7 @@ import {
   NextLink,
   FetchResult,
 } from '@apollo/client'
-import { argumentsObjectFromField, getDefaultValues } from 'apollo-utilities'
+import { argumentsObjectFromField } from 'apollo-utilities'
 import {
   findNodePaths,
   removeDirectivesFromDocument,
@@ -38,13 +34,6 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
     }
   }
 
-  // Extract default values from the document and merge with provided variables
-  const operationDefinition = document.definitions.find(
-    (def) => def.kind === 'OperationDefinition'
-  ) as OperationDefinitionNode
-  const defaultValues = getDefaultValues(operationDefinition) || {}
-  const mergedVariables = { ...defaultValues, ...variables }
-
   const { modifiedDoc, nodesToRemove } = removeDirectivesFromDocument(
     [
       {
@@ -57,7 +46,7 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
           if (directive?.name?.value === DIRECTIVE) {
             const args: DirectiveArguments = argumentsObjectFromField(
               directive,
-              mergedVariables
+              variables
             )
             if (args.ifFeature !== undefined && args.if !== undefined) {
               return !(

@@ -9,6 +9,8 @@ import {
   simpleQuery,
   variablesMockResult,
   variablesQuery,
+  queryWithDefaultsMockResult,
+  queryWithDefaults,
 } from './mocks'
 
 describe('KeepLink e2e', () => {
@@ -24,6 +26,8 @@ describe('KeepLink e2e', () => {
           return productsMockResult
         case 'variablesQuery':
           return variablesMockResult
+        case 'queryWithDefaults':
+          return queryWithDefaultsMockResult
         default:
           throw new Error('Not implemented.')
       }
@@ -73,5 +77,24 @@ describe('KeepLink e2e', () => {
     }
     const result = await client.query({ ...queryArgs, errorPolicy: 'all' })
     expect(result.data).toEqual(cache.readQuery(queryArgs))
+  })
+
+  describe('Default variables', () => {
+    it('should use default value when variable is not provided', async () => {
+      const queryArgs = {
+        query: queryWithDefaults,
+        variables: {},
+      }
+      const result = await client.query({ ...queryArgs, errorPolicy: 'all' })
+      expect(result.data).toEqual(cache.readQuery(queryArgs))
+    })
+    it('should handle undefined', async () => {
+      const queryArgs = {
+        query: queryWithDefaults,
+        variables: { someArg: undefined },
+      }
+      const result = await client.query({ ...queryArgs, errorPolicy: 'all' })
+      expect(result.data).toEqual(cache.readQuery(queryArgs))
+    })
   })
 })

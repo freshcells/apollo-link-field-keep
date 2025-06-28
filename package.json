@@ -39,7 +39,7 @@
     "doc:json": "typedoc src/ --exclude \"**/+(__tests__|examples)/*\" --json build/docs/api/typedoc.json"
   },
   "devDependencies": {
-    "@apollo/client": "^3.5.10",
+    "@apollo/client": "^3.13.8",
     "@babel/core": "^7.17.9",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
