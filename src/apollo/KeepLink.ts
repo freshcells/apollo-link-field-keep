@@ -56,7 +56,7 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
             if (args.ifFeature) {
               return enabledFeatures.indexOf(args.ifFeature) === -1
             }
-            if (process.env.NODE_ENV !== 'development') {
+            if (process.env.NODE_ENV !== 'production') {
               if (typeof args.if === 'undefined') {
                 console.warn(
                   'KeepLink: Passing `undefined` to @keep might yield to unexpected results with default variables (e.g. $var: String), in combination with persisted queries. Make sure to either always pass a value or use required types (e.g. String!) so default values are passed properly.'
