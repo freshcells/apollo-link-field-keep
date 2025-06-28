@@ -9,8 +9,7 @@ exports[` 1`] = `
     subFieldA
     subFieldB
   }
-}
-"
+}"
 `;
 
 exports[` 2`] = `
@@ -22,8 +21,7 @@ exports[` 2`] = `
     subFieldA
     subFieldB
   }
-}
-"
+}"
 `;
 
 exports[` 3`] = `
@@ -35,8 +33,7 @@ exports[` 3`] = `
     subFieldA
     subFieldB
   }
-}
-"
+}"
 `;
 
 exports[` 4`] = `
@@ -58,8 +55,7 @@ mutation complexWithNestedFragments {
       ...level1
     }
   }
-}
-"
+}"
 `;
 
 exports[` 5`] = `
@@ -71,8 +67,7 @@ exports[` 5`] = `
       }
     }
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if Aliases should properly map aliases 1`] = `
@@ -80,8 +75,7 @@ exports[`KeepLink with if Aliases should properly map aliases 1`] = `
   aliasForDeeply: deeply {
     nested
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if Field Arguments should keep variables if they are used elsewhere 1`] = `
@@ -91,8 +85,7 @@ exports[`KeepLink with if Field Arguments should keep variables if they are used
       subSubFieldOther
     }
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if Field Arguments should remove query argument variables if exists 1`] = `
@@ -100,8 +93,7 @@ exports[`KeepLink with if Field Arguments should remove query argument variables
   someOther {
     subFieldOther
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if Fragment should work with fragments 1`] = `
@@ -109,8 +101,7 @@ exports[`KeepLink with if Fragment should work with fragments 1`] = `
   deeply {
     nested
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if and ifFeature Aliases should properly map aliases 1`] = `
@@ -118,8 +109,7 @@ exports[`KeepLink with if and ifFeature Aliases should properly map aliases 1`] 
   aliasForDeeply: deeply {
     nested
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if and ifFeature Field Arguments should keep variables if they are used elsewhere 1`] = `
@@ -129,8 +119,7 @@ exports[`KeepLink with if and ifFeature Field Arguments should keep variables if
       subSubFieldOther
     }
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if and ifFeature Field Arguments should remove argument variables if exists 1`] = `
@@ -138,8 +127,7 @@ exports[`KeepLink with if and ifFeature Field Arguments should remove argument v
   someOther {
     subFieldOther
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if and ifFeature Fragment should work with fragments 1`] = `
@@ -147,8 +135,7 @@ exports[`KeepLink with if and ifFeature Fragment should work with fragments 1`] 
   deeply {
     nested
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if and ifFeature should keep fields, but remove directives if shouldKeep is true and feature1 is enabled 1`] = `
@@ -160,8 +147,7 @@ exports[`KeepLink with if and ifFeature should keep fields, but remove directive
     subFieldA
     subFieldB
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if and ifFeature should remove directives and fields if shouldKeep is false and feature1 is not enabled 1`] = `
@@ -169,8 +155,7 @@ exports[`KeepLink with if and ifFeature should remove directives and fields if s
   test {
     some
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if should keep fields, but remove directives if shouldKeep is true 1`] = `
@@ -182,8 +167,7 @@ exports[`KeepLink with if should keep fields, but remove directives if shouldKee
     subFieldA
     subFieldB
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with if should remove directives and fields if shouldKeep is false 1`] = `
@@ -191,8 +175,7 @@ exports[`KeepLink with if should remove directives and fields if shouldKeep is f
   test {
     some
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with ifFeature Aliases should properly map aliases 1`] = `
@@ -200,8 +183,7 @@ exports[`KeepLink with ifFeature Aliases should properly map aliases 1`] = `
   aliasForDeeply: deeply {
     nested
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with ifFeature Field Arguments should keep variables if they are used elsewhere 1`] = `
@@ -211,8 +193,7 @@ exports[`KeepLink with ifFeature Field Arguments should keep variables if they a
       subSubFieldOther
     }
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with ifFeature Field Arguments should remove argument variables if exists 1`] = `
@@ -220,8 +201,7 @@ exports[`KeepLink with ifFeature Field Arguments should remove argument variable
   someOther {
     subFieldOther
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with ifFeature Fragment should work with fragments 1`] = `
@@ -229,8 +209,7 @@ exports[`KeepLink with ifFeature Fragment should work with fragments 1`] = `
   deeply {
     nested
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with ifFeature should keep fields, but remove directives if feature1 is enabled 1`] = `
@@ -242,8 +221,7 @@ exports[`KeepLink with ifFeature should keep fields, but remove directives if fe
     subFieldA
     subFieldB
   }
-}
-"
+}"
 `;
 
 exports[`KeepLink with ifFeature should remove directives and fields if feature1 is not enabled 1`] = `
@@ -251,6 +229,5 @@ exports[`KeepLink with ifFeature should remove directives and fields if feature1
   test {
     some
   }
-}
-"
+}"
 `;

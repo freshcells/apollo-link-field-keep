@@ -6,7 +6,7 @@ import {
   NextLink,
   FetchResult,
 } from '@apollo/client'
-import { argumentsObjectFromField } from 'apollo-utilities'
+import { argumentsObjectFromField, getOperationName } from 'apollo-utilities'
 import {
   findNodePaths,
   removeDirectivesFromDocument,
@@ -59,7 +59,10 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
             if (process.env.NODE_ENV !== 'production') {
               if (typeof args.if === 'undefined') {
                 console.warn(
-                  'KeepLink: Passing `undefined` to @keep might yield to unexpected results with default variables (e.g. $var: String), in combination with persisted queries. Make sure to either always pass a value or use required types (e.g. String!) so default values are passed properly.'
+                  `KeepLink: (Operation: "${getOperationName(
+                    document
+                  )}") Passing undefined to @keep may lead to unexpected outcomes when using default variables (e.g., $var: String) alongside persisted queries. Ensure that you always provide a value or utilize required types (e.g., String!) to ensure default values are correctly applied. Provided variables:`,
+                  variables
                 )
               }
             }
