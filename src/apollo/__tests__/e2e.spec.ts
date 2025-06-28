@@ -11,6 +11,8 @@ import {
   variablesQuery,
   queryWithDefaultsMockResult,
   queryWithDefaults,
+  queryWithOptionalDefaults,
+  queryWithOptionalDefaultsMockResult,
 } from './mocks'
 
 describe('KeepLink e2e', () => {
@@ -28,6 +30,8 @@ describe('KeepLink e2e', () => {
           return variablesMockResult
         case 'queryWithDefaults':
           return queryWithDefaultsMockResult
+        case 'queryWithOptionalDefaults':
+          return queryWithOptionalDefaultsMockResult
         default:
           throw new Error('Not implemented.')
       }
@@ -91,6 +95,14 @@ describe('KeepLink e2e', () => {
     it('should handle undefined', async () => {
       const queryArgs = {
         query: queryWithDefaults,
+        variables: { someArg: undefined },
+      }
+      const result = await client.query({ ...queryArgs, errorPolicy: 'all' })
+      expect(result.data).toEqual(cache.readQuery(queryArgs))
+    })
+    it('should handle optional undefined', async () => {
+      const queryArgs = {
+        query: queryWithOptionalDefaults,
         variables: { someArg: undefined },
       }
       const result = await client.query({ ...queryArgs, errorPolicy: 'all' })

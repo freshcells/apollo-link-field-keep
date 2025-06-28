@@ -45,6 +45,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@types/istanbul-lib-coverage": "^2.0.4",
     "@types/jest": "^27.4.1",
+    "@types/node": "^24.0.7",
     "@types/react": "^17.0.39",
     "@types/zen-observable": "^0.8.3",
     "@typescript-eslint/eslint-plugin": "^6.21.0",

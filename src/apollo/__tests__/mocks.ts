@@ -136,6 +136,15 @@ export const simpleQuery = gql`
   }
 `
 
+export const queryWithOptionalDefaults = gql`
+  query queryWithOptionalDefaults($someArg: Boolean = false) {
+    myType {
+      field @keep(if: $someArg)
+      other
+    }
+  }
+`
+
 export const queryWithDefaults = gql`
   query queryWithDefaults($someArg: Boolean! = false) {
     myType {
@@ -144,6 +153,15 @@ export const queryWithDefaults = gql`
     }
   }
 `
+export const queryWithOptionalDefaultsMockResult = Observable.of<FetchResult>({
+  data: {
+    myType: {
+      field: 'field',
+      other: 'other',
+      __typename: 'MyType',
+    },
+  },
+})
 export const queryWithDefaultsMockResult = Observable.of<FetchResult>({
   data: {
     myType: {
