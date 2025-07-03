@@ -1,4 +1,4 @@
-import type { DocumentNode, DirectiveNode } from 'graphql'
+import { DocumentNode, DirectiveNode, print } from 'graphql'
 import {
   ApolloLink,
   Observable,
@@ -20,20 +20,11 @@ interface DirectiveArguments extends Record<string, any> {
   ifFeature?: string
 }
 
-const unmodifiedDocsCache = new WeakSet<DocumentNode>()
-
 export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
   document: T,
   variables: Record<string, any>,
   enabledFeatures: Array<string>
 ): { modifiedDoc: T; nullFields: Array<Array<string | number>> } {
-  if (unmodifiedDocsCache.has(document)) {
-    return {
-      modifiedDoc: document,
-      nullFields: [],
-    }
-  }
-
   const { modifiedDoc, nodesToRemove } = removeDirectivesFromDocument(
     [
       {
@@ -48,6 +39,23 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
               directive,
               variables
             )
+            if (process.env.NODE_ENV !== 'production') {
+              if (
+                args.if ||
+                (Object.hasOwn(args, 'if') && args.if === undefined) ||
+                args.if === false
+              ) {
+                console.warn(
+                  `KeepLink: (Operation: "${getOperationName(
+                    document
+                  )}") Using @keep(if: ..) is deprecated and should be avoided. Please use "ifFeature" instead. Location: ${print(
+                    directive
+                  )} with variables:`,
+                  variables
+                )
+              }
+            }
+
             if (args.ifFeature !== undefined && args.if !== undefined) {
               return !(
                 args.if && enabledFeatures.indexOf(args.ifFeature) !== -1
@@ -56,16 +64,7 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
             if (args.ifFeature) {
               return enabledFeatures.indexOf(args.ifFeature) === -1
             }
-            if (process.env.NODE_ENV !== 'production') {
-              if (typeof args.if === 'undefined') {
-                console.warn(
-                  `KeepLink: (Operation: "${getOperationName(
-                    document
-                  )}") Passing undefined to @keep may lead to unexpected outcomes when using default variables (e.g., $var: String) alongside persisted queries. Ensure that you always provide a value or utilize required types (e.g., String!) to ensure default values are correctly applied. Provided variables:`,
-                  variables
-                )
-              }
-            }
+
             return args.if === false
           }
           return false
@@ -76,8 +75,6 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
   )
 
   if (modifiedDoc === document) {
-    // cache documents that do not have any directives
-    unmodifiedDocsCache.add(document)
     return { modifiedDoc: modifiedDoc as T, nullFields: [] }
   }
 
@@ -89,8 +86,19 @@ export function removeIgnoreSetsFromDocument<T extends DocumentNode>(
 
 export class KeepLink extends ApolloLink {
   private _enabledFeatures: string[] = []
+  private _docsCache = new WeakMap<
+    DocumentNode,
+    { modifiedDoc: DocumentNode; nullFields: (string | number)[][] }
+  >()
 
   public set enabledFeatures(features: string[]) {
+    if (this._enabledFeatures !== features) {
+      // reset cache if features changed
+      this._docsCache = new WeakMap<
+        DocumentNode,
+        { modifiedDoc: DocumentNode; nullFields: (string | number)[][] }
+      >()
+    }
     this._enabledFeatures = features
   }
 
@@ -105,12 +113,29 @@ export class KeepLink extends ApolloLink {
     operation.setContext(({ schemas = [] }) => ({
       schemas: (schemas as Record<string, string>[]).concat([{ directives }]),
     }))
-    const { modifiedDoc, nullFields } = removeIgnoreSetsFromDocument(
-      operation.query,
-      operation.variables,
-      this._enabledFeatures
-    )
-    operation.query = modifiedDoc
+    let nullFields = [] as (string | number)[][]
+    if (this._docsCache.has(operation.query)) {
+      const { modifiedDoc, nullFields: cachedNullFields } = this._docsCache.get(
+        operation.query
+      )!
+      nullFields = cachedNullFields
+      operation.query = modifiedDoc
+    } else {
+      const { modifiedDoc, nullFields: newNullFields } =
+        removeIgnoreSetsFromDocument(
+          operation.query,
+          operation.variables,
+          this._enabledFeatures
+        )
+      this._docsCache.set(operation.query, {
+        modifiedDoc,
+        nullFields: newNullFields,
+      })
+
+      nullFields = newNullFields
+      operation.query = modifiedDoc
+    }
+
     // only apply the changes if we actually removed fields.
     if (nullFields.length > 0) {
       return new Observable((observer) => {

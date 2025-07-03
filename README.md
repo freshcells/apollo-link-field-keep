@@ -110,35 +110,40 @@ To prevent Apollo Cache issues, it will fill the field with `null` when returned
 Using `apollo-link-field-keep` with persisted queries, is possible, but requires some pre-processing, before you can
 send it to the backend.
 
+> [!WARNING] 
+> Only the static version `@keep(ifFeature: "name")` works, because it can be statically inferred on both client
+> and server. Please do not use `@keep(if: $someVariable)` with persistent queries, as variables won't be transferred to
+> the server side and cannot be analyzed.
+
 The library exposes the function `removeIgnoreSetsFromDocument` to remove any `@keep` directives.
 Make sure you still have `KeepLink` in your pipeline (so it can handle the `null` values properly)
 
 #### Example
 
 ```ts
-import { removeIgnoreSetsFromDocument } from '@freshcells/apollo-link-field-keep'
+import {removeIgnoreSetsFromDocument} from '@freshcells/apollo-link-field-keep'
 import {
-  getDefaultValues,
-  removeConnectionDirectiveFromDocument,
+    getDefaultValues,
+    removeConnectionDirectiveFromDocument,
 } from 'apollo-utilities'
-import { parse, print } from 'graphql/index'
+import {parse, print} from 'graphql/index'
 
 export const removeClientDirectives = <T extends Record<string, unknown>>(
-  query: string,
-  variables: T,
-  featureList: string[]
+    query: string,
+    variables: T,
+    featureList: string[]
 ) => {
-  const parsedQuery = parse(query)
-  // we have to restore the default variables, as they might have been removed by the keepLink before sending them to the server.
-  const defaults = getDefaultValues(
-    parsedQuery.definitions.find((d) => d.kind === 'OperationDefinition')
-  )
-  const nextQuery = removeIgnoreSetsFromDocument(
-    removeConnectionDirectiveFromDocument(parsedQuery),
-    { ...defaults, ...variables },
-    featureList
-  )
-  return print(nextQuery.modifiedDoc)
+    const parsedQuery = parse(query)
+    // we have to restore the default variables, as they might have been removed by the keepLink before sending them to the server.
+    const defaults = getDefaultValues(
+        parsedQuery.definitions.find((d) => d.kind === 'OperationDefinition')
+    )
+    const nextQuery = removeIgnoreSetsFromDocument(
+        removeConnectionDirectiveFromDocument(parsedQuery),
+        {...defaults, ...variables},
+        featureList
+    )
+    return print(nextQuery.modifiedDoc)
 }
 ```
 
